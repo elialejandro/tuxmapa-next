@@ -50,6 +50,9 @@ export default function Sidebar({
     if (!isOpen) setSearchTerm('');
   }, [isOpen]);
 
+  const translateClass = isOpen ? 'translate-x-0' : '-translate-x-full';
+  const desktopVisible = isOpen ? 'lg:translate-x-0' : 'lg:-translate-x-full';
+
   return (
     <>
       {/* Backdrop — mobile only */}
@@ -61,16 +64,15 @@ export default function Sidebar({
         />
       )}
 
-      {/* Drawer — fixed on mobile, pushes content on desktop */}
+      {/* Drawer */}
       <aside
         className={`
-          bg-white shadow-xl z-[1002] transition-transform duration-200 ease-out
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          bg-white shadow-xl z-[1002] transition-all duration-200 ease-out
+          ${translateClass} ${desktopVisible}
           /* Mobile: fixed overlay */
           fixed left-0 top-0 h-full w-72
-          /* Desktop: pushes content instead of overlay */
-          lg:relative lg:top-auto lg:h-full lg:w-72 lg:shadow-none lg:border-r lg:border-slate-200
-          ${isOpen ? 'lg:translate-x-0' : 'lg:-translate-x-0'}
+          /* Desktop: fixed to left, below toolbar */
+          lg:fixed lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:w-72 lg:shadow-none lg:border-r lg:border-slate-200
         `}
         aria-label="Navegación"
       >
