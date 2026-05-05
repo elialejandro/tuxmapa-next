@@ -1,65 +1,173 @@
-import Image from "next/image";
+'use client';
+
+// ============================================================
+// Main Map Page — TuXmapa Home
+// ============================================================
+
+import { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
+import { useMapContext } from '@/context/MapContext';
+import { getRutas, getRuta, getMejorRuta, getRutasCercanas } from '@/lib/api';
+import type { LatLng, RutaListItem } from '@/types';
+import Toolbar from '@/components/Toolbar';
+import Sidebar from '@/components/Sidebar';
+
+// Dynamic import for MapView (Leaflet requires window, so no SSR)
+const MapView = dynamic(() => import('@/components/MapView'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center bg-slate-100">
+      <div className="text-slate-500">Cargando mapa...</div>
+    </div>
+  ),
+});
 
 export default function Home() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [rutas, setRutas] = useState<RutaListItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const {
+    selectedRoute,
+    setSelectedRoute,
+    setPunto1,
+    setPunto2,
+    setMode,
+    clearMap,
+    mode,
+    setMejorRutaResult,
+    setNearbyRoutes,
+    punto1,
+  } = useMapContext();
+
+  // ── Fetch rutas on mount ─────────────────────────────────
+
+  useEffect(() => {
+    async function fetchRutas() {
+      try {
+        const response = await getRutas();
+        setRutas(response.list);
+      } catch (error) {
+        console.error('Error fetching rutas:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchRutas();
+  }, []);
+
+  // ── Route selection ────────────────────────────────────
+
+  const handleRouteSelect = useCallback(
+    async (rutaNombre: string) => {
+      try {
+        const rutaDetail = await getRuta(rutaNombre);
+        setSelectedRoute(rutaDetail);
+        setMode('idle');
+      } catch (error) {
+        console.error('Error fetching ruta detail:', error);
+      }
+    },
+    [setSelectedRoute, setMode]
+  );
+
+  // ── Point selection mode ───────────────────────────────
+
+  const handlePointSelectionMode = useCallback(() => {
+    setPunto1(null);
+    setPunto2(null);
+    setMejorRutaResult(null);
+    setMode('point-selection');
+  }, [setPunto1, setPunto2, setMejorRutaResult, setMode]);
+
+  // ── Nearby routes mode ─────────────────────────────────
+
+  const handleNearbyRoutesMode = useCallback(() => {
+    setPunto1(null);
+    setPunto2(null);
+    setMejorRutaResult(null);
+    setNearbyRoutes([]);
+    setMode('nearby-routes');
+  }, [setPunto1, setPunto2, setMejorRutaResult, setNearbyRoutes, setMode]);
+
+  // ── Clear map ──────────────────────────────────────────
+
+  const handleClearMap = useCallback(() => {
+    clearMap();
+  }, [clearMap]);
+
+  // ── Map click handler ──────────────────────────────────
+
+  const handleMapClick = useCallback(
+    async (lat: number, lng: number) => {
+      const clickedPoint: LatLng = { lat, lng };
+
+      if (mode === 'point-selection') {
+        if (!punto1) {
+          // First click - set punto1
+          setPunto1(clickedPoint);
+        } else {
+          // Second click - set punto2 and get mejor ruta
+          setPunto2(clickedPoint);
+          try {
+            const result = await getMejorRuta(punto1, clickedPoint);
+            setMejorRutaResult(result); // Store the full array
+            setMode('idle');
+          } catch (error) {
+            console.error('Error fetching mejor ruta:', error);
+            setMode('idle');
+          }
+        }
+      } else if (mode === 'nearby-routes') {
+        // Single click - get nearby routes
+        try {
+          const nearby = await getRutasCercanas(clickedPoint);
+          setNearbyRoutes(nearby);
+        } catch (error) {
+          console.error('Error fetching nearby routes:', error);
+        }
+      }
+    },
+    [mode, punto1, setPunto1, setPunto2, setMejorRutaResult, setMode, setNearbyRoutes]
+  );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="flex flex-col h-full">
+      <Toolbar onMenuClick={() => setIsSidebarOpen(true)} />
+
+      <main className="flex-1 relative">
+        <MapView onMapClick={handleMapClick} />
+
+        {/* FAB to open sidebar */}
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          aria-label="Abrir menú de rutas"
+          className="absolute bottom-6 right-6 z-[1001] w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        {/* Error toast when API fails */}
+        {isLoading && rutas.length === 0 && (
+          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-30 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+            ⚠️ No se pudieron cargar las rutas. Verifica la conexión con la API.
+          </div>
+        )}
       </main>
+
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        rutas={rutas}
+        onRouteSelect={handleRouteSelect}
+        selectedRoute={selectedRoute?.ruta ?? null}
+        onPointSelectionMode={handlePointSelectionMode}
+        onNearbyRoutesMode={handleNearbyRoutesMode}
+        onClearMap={handleClearMap}
+        isLoading={isLoading}
+      />
     </div>
   );
 }
