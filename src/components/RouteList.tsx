@@ -43,7 +43,7 @@ export default function RouteList({
                   onClick={() => onRouteSelect(item.ruta)}
                   className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-colors ${
                     isSelected
-                      ? 'bg-blue-50 text-blue-700 font-medium'
+                      ? 'bg-[#0c72b5]/10 text-[#0c72b5] font-medium'
                       : 'text-slate-700 hover:bg-slate-50'
                   }`}
                 >

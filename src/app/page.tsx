@@ -11,15 +11,12 @@ import { getRutas, getRuta, getMejorRuta, getRutasCercanas } from '@/lib/api';
 import type { LatLng, RutaListItem } from '@/types';
 import Toolbar from '@/components/Toolbar';
 import Sidebar from '@/components/Sidebar';
+import LoadingScreen from '@/components/LoadingScreen';
 
 // Dynamic import for MapView (Leaflet requires window, so no SSR)
 const MapView = dynamic(() => import('@/components/MapView'), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-slate-100">
-      <div className="text-slate-500">Cargando mapa...</div>
-    </div>
-  ),
+  loading: () => <LoadingScreen message="Cargando mapa..." />,
 });
 
 export default function Home() {
@@ -142,7 +139,7 @@ export default function Home() {
         <button
           onClick={() => setIsSidebarOpen(true)}
           aria-label="Abrir menú de rutas"
-          className="absolute bottom-6 right-6 z-[1001] w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
+          className="absolute bottom-6 right-6 z-[1001] w-14 h-14 bg-[#0c72b5] hover:bg-[#0a5f96] text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />

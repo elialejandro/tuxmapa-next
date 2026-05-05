@@ -98,7 +98,7 @@ export default function ResultsPanel() {
                   <li key={`${ruta.nombre}-${index}`}>
                     <button
                       onClick={() => handleMejorRutaClick(ruta)}
-                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-[#0c72b5]/10 hover:text-[#0c72b5] transition-colors flex items-center gap-2"
                     >
                       <svg
                         className="w-4 h-4 text-green-600 flex-shrink-0"
@@ -132,7 +132,7 @@ export default function ResultsPanel() {
                   <li key={`${ruta.nombre}-${index}`}>
                     <button
                       onClick={() => handleNearbyRouteClick(ruta.nombre)}
-                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-[#0c72b5]/10 hover:text-[#0c72b5] transition-colors flex items-center gap-2"
                     >
                       <svg
                         className="w-4 h-4 text-purple-600 flex-shrink-0"
