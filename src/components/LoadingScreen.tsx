@@ -2,15 +2,33 @@
 
 // ============================================================
 // LoadingScreen — Full-screen loader with logo animation
+// Auto-dismisses after minimumDuration milliseconds.
 // ============================================================
 
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 interface LoadingScreenProps {
   message?: string;
+  minimumDuration?: number; // milliseconds, default 1500
 }
 
-export default function LoadingScreen({ message = 'Cargando...' }: LoadingScreenProps) {
+export default function LoadingScreen({
+  message = 'Cargando...',
+  minimumDuration = 1500,
+}: LoadingScreenProps) {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setVisible(false);
+    }, minimumDuration);
+
+    return () => clearTimeout(timer);
+  }, [minimumDuration]);
+
+  if (!visible) return null;
+
   return (
     <div className="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center">
       {/* Logo with pulse animation */}
