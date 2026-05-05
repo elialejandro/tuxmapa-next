@@ -50,6 +50,9 @@ export default function Sidebar({
     if (!isOpen) setSearchTerm('');
   }, [isOpen]);
 
+  const translateClass = isOpen ? 'translate-x-0' : '-translate-x-full';
+  const desktopVisible = isOpen ? 'lg:translate-x-0' : 'lg:-translate-x-full';
+
   return (
     <>
       {/* Backdrop — mobile only */}
@@ -65,13 +68,11 @@ export default function Sidebar({
       <aside
         className={`
           bg-white shadow-xl z-[1002] transition-all duration-200 ease-out
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          ${translateClass} ${desktopVisible}
           /* Mobile: fixed overlay */
           fixed left-0 top-0 h-full w-72
-          /* Desktop: flex item, slides in/out and pushes map */
-          lg:relative lg:top-auto lg:h-full
-          ${isOpen ? 'lg:w-72 lg:shadow-none lg:border-r lg:border-slate-200' : 'lg:w-0 lg:overflow-hidden lg:shadow-none lg:border-r lg:border-slate-200'}
-          ${isOpen ? 'lg:translate-x-0' : 'lg:-translate-x-full'}
+          /* Desktop: fixed to left, below toolbar */
+          lg:fixed lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:w-72 lg:shadow-none lg:border-r lg:border-slate-200
         `}
         aria-label="Navegación"
       >
