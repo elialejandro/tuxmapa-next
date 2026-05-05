@@ -24,13 +24,13 @@ export default function Toolbar({
   const isHomePage = pathname === '/';
 
   return (
-    <header className="flex items-center gap-3 px-4 h-14 bg-slate-800 text-white shadow-md z-50">
+    <header className="flex items-center gap-3 px-4 h-14 bg-[#0c72b5] text-white shadow-md z-50">
       {/* Menu button (hamburger) — only on home page */}
       {isHomePage ? (
         <button
           onClick={onMenuClick}
           aria-label="Abrir menú"
-          className="p-2 hover:bg-slate-700 rounded-md transition-colors"
+          className="p-2 hover:bg-[#0a5f96] rounded-md transition-colors"
         >
           <svg
             className="w-6 h-6"
@@ -50,7 +50,7 @@ export default function Toolbar({
         <Link
           href="/"
           aria-label="Volver al mapa"
-          className="p-2 hover:bg-slate-700 rounded-md transition-colors"
+          className="p-2 hover:bg-[#0a5f96] rounded-md transition-colors"
         >
           <svg
             className="w-6 h-6"
