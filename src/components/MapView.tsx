@@ -32,7 +32,7 @@ const getTileConfig = (): TileConfig => {
 
   if (provider === 'thunderforest' && apikey) {
     return {
-      url: 'https://{s}.api.thunderforest.com/atlas/{z}/{x}/{y}{r}.png?apikey=' + apikey,
+      url: 'https://api.thunderforest.com/atlas/{z}/{x}/{y}{r}.png?apikey=' + apikey,
       attribution: '&copy; <a href="https://www.thunderforest.com/">Thunderforest</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 22,
     };
