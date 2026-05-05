@@ -129,31 +129,8 @@ export default function Home() {
   );
 
   return (
-    <div className="flex flex-col h-full">
-      <Toolbar onMenuClick={() => setIsSidebarOpen(true)} />
-
-      <main className="flex-1 relative">
-        <MapView onMapClick={handleMapClick} />
-
-        {/* FAB to open sidebar */}
-        <button
-          onClick={() => setIsSidebarOpen(true)}
-          aria-label="Abrir menú de rutas"
-          className="absolute bottom-6 right-6 z-[1001] w-14 h-14 bg-[#0c72b5] hover:bg-[#0a5f96] text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-
-        {/* Error toast when API fails */}
-        {isLoading && rutas.length === 0 && (
-          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-30 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
-            ⚠️ No se pudieron cargar las rutas. Verifica la conexión con la API.
-          </div>
-        )}
-      </main>
-
+    <div className="flex h-full">
+      {/* Sidebar — pushes content on desktop, overlay on mobile */}
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
@@ -165,6 +142,33 @@ export default function Home() {
         onClearMap={handleClearMap}
         isLoading={isLoading}
       />
+
+      {/* Main content area */}
+      <div className="flex flex-col flex-1 min-w-0">
+        <Toolbar onMenuClick={() => setIsSidebarOpen(true)} />
+
+        <main className="flex-1 relative">
+          <MapView onMapClick={handleMapClick} />
+
+          {/* FAB to open sidebar — hidden on desktop (sidebar always visible) */}
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            aria-label="Abrir menú de rutas"
+            className="absolute bottom-6 right-6 z-[1001] w-14 h-14 bg-[#0c72b5] hover:bg-[#0a5f96] text-white rounded-full shadow-lg flex items-center justify-center transition-colors lg:hidden"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+
+          {/* Error toast when API fails */}
+          {isLoading && rutas.length === 0 && (
+            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-30 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+              ⚠️ No se pudieron cargar las rutas. Verifica la conexión con la API.
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

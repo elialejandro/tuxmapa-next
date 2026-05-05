@@ -52,20 +52,26 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — mobile only */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 transition-opacity"
+          className="fixed inset-0 bg-black/50 z-40 transition-opacity lg:hidden"
           onClick={onClose}
           aria-hidden="true"
         />
       )}
 
-      {/* Drawer */}
+      {/* Drawer — fixed on mobile, pushes content on desktop */}
       <aside
-        className={`fixed left-0 top-0 h-full w-72 bg-white shadow-xl z-[1002] transform transition-transform duration-200 ease-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`
+          bg-white shadow-xl z-[1002] transition-transform duration-200 ease-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          /* Mobile: fixed overlay */
+          fixed left-0 top-0 h-full w-72
+          /* Desktop: pushes content instead of overlay */
+          lg:relative lg:top-auto lg:h-full lg:w-72 lg:shadow-none lg:border-r lg:border-slate-200
+          ${isOpen ? 'lg:translate-x-0' : 'lg:-translate-x-0'}
+        `}
         aria-label="Navegación"
       >
         {/* Header */}
