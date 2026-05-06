@@ -13,6 +13,7 @@ import Toolbar from '@/components/Toolbar';
 import Sidebar from '@/components/Sidebar';
 import LoadingScreen from '@/components/LoadingScreen';
 import Toast from '@/components/Toast';
+import ResultsPanel from '@/components/ResultsPanel';
 
 // Dynamic import for MapView (Leaflet requires window, so no SSR)
 const MapView = dynamic(() => import('@/components/MapView'), {
@@ -89,7 +90,7 @@ export default function Home() {
     setMejorRutaResult(null);
     setNearbyRoutes([]);
     setMode('nearby-routes');
-    setToast({ message: 'Buscando rutas cercanas...', type: 'info' });
+    setToast({ message: 'Esperando el punto inicial.', type: 'info' });
   }, [setPunto1, setPunto2, setMejorRutaResult, setNearbyRoutes, setMode]);
 
   // ── Clear map ──────────────────────────────────────────
@@ -153,6 +154,7 @@ export default function Home() {
         }
       } else if (modeRef.current === 'nearby-routes') {
         console.log('[TUXMAPA] nearby-routes mode, searching');
+        setPunto1Ref.current(clickedPoint); // Store for visual feedback (circle on map)
         try {
           const nearby = await getRutasCercanas(clickedPoint);
           setNearbyRoutesRef.current(nearby);
@@ -187,6 +189,9 @@ export default function Home() {
 
         <main className="flex-1 relative">
           <MapView onMapClick={handleMapClick} />
+
+          {/* Results panel for nearby routes and mejor ruta */}
+          <ResultsPanel />
 
           {/* FAB to open sidebar — hidden on desktop (sidebar always visible) */}
           <button
