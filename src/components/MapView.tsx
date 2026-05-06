@@ -99,7 +99,9 @@ export default function MapView({ onMapClick }: MapViewProps) {
 
     // Map click handler
     map.on('click', (e: L.LeafletMouseEvent) => {
+      console.log('[TUXMAPA] Map clicked', { lat: e.latlng.lat, lng: e.latlng.lng });
       if (onMapClick) {
+        console.log('[TUXMAPA] Calling onMapClick');
         onMapClick(e.latlng.lat, e.latlng.lng);
       }
     });
@@ -199,6 +201,7 @@ export default function MapView({ onMapClick }: MapViewProps) {
 
     // Punto 1 circle
     if (punto1) {
+      console.log('[TUXMAPA] Rendering punto1 circle at', punto1);
       const circle1 = L.circle([punto1.lat, punto1.lng], {
         color: CIRCLE_COLORS.punto1,
         fillColor: CIRCLE_COLORS.punto1,
