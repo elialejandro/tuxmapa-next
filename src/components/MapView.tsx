@@ -65,7 +65,7 @@ export default function MapView({ onMapClick }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const polylinesRef = useRef<L.Polyline[]>([]);
-  const circlesRef = useRef<L.Circle[]>([]);
+  const circlesRef = useRef<(L.Circle | L.Marker)[]>([]);
 
   const {
     mode,
