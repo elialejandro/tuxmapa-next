@@ -155,33 +155,23 @@ export default function MapView({ onMapClick }: MapViewProps) {
       }
     }
 
-    // Render mejor_ruta polylines (iterate over array of results)
-    if (mejorRutaResult && mejorRutaResult.length > 0) {
-      mejorRutaResult.forEach((result) => {
-        result.rutas.forEach((ruta) => {
-          const coords = decodePolyline(ruta.puntos);
-          if (coords.length > 0) {
-            const polyline = L.polyline(coords, {
-              color: POLYLINE_COLORS.ladoUno,
-              weight: POLYLINE_COLORS.strokeWeight,
-            }).addTo(map);
-            polylinesRef.current.push(polyline);
-          }
-        });
-      });
-    }
+    // Render mejor_ruta polylines ONLY from context state (set by ResultsPanel click)
+    // We do NOT auto-render from mejorRutaResult — that's handled by clicking results in the panel
 
     // Render polylines from context state (directo from punto selection)
-    if (polylines.ladoUno.length > 0) {
-      const poly1 = L.polyline(polylines.ladoUno, {
+    const ladoUno = polylines?.ladoUno ?? [];
+    const ladoDos = polylines?.ladoDos ?? [];
+
+    if (ladoUno.length > 0) {
+      const poly1 = L.polyline(ladoUno, {
         color: POLYLINE_COLORS.ladoUno,
         weight: POLYLINE_COLORS.strokeWeight,
       }).addTo(map);
       polylinesRef.current.push(poly1);
     }
 
-    if (polylines.ladoDos.length > 0) {
-      const poly2 = L.polyline(polylines.ladoDos, {
+    if (ladoDos.length > 0) {
+      const poly2 = L.polyline(ladoDos, {
         color: POLYLINE_COLORS.ladoDos,
         weight: POLYLINE_COLORS.strokeWeight,
       }).addTo(map);
@@ -234,6 +224,18 @@ export default function MapView({ onMapClick }: MapViewProps) {
         weight: 1,
       }).addTo(map);
       circlesRef.current.push(circleCruce);
+
+      // Add intersection marker with label
+      const intersectIcon = L.divIcon({
+        html: '<div style="background:#0084b4;color:white;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.3);">Intersecc.</div>',
+        className: 'intersection-marker',
+        iconSize: [80, 24],
+        iconAnchor: [40, 12],
+      });
+      const intersectMarker = L.marker([cruce.lat, cruce.lng], {
+        icon: intersectIcon,
+      }).addTo(map);
+      circlesRef.current.push(intersectMarker);
     }
   }, [punto1, punto2, cruce]);
 

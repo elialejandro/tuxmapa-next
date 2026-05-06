@@ -4,12 +4,13 @@
 // ResultsPanel — Collapsible Results Panel
 // ============================================================
 // Shows found routes from "mejor_ruta" or "rutas_cercanas" queries.
-// Each route name is clickable and triggers map display.
+// Each route combination (pair) is clickable and shows its specific routes + cruce.
 
 import { useState } from 'react';
 import { useMapState } from '@/hooks/useMapState';
 import { decodePolyline } from '@/lib/polyline';
 import { getRuta } from '@/lib/api';
+import type { MejorRutaResponse } from '@/types';
 
 export default function ResultsPanel() {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -24,22 +25,21 @@ export default function ResultsPanel() {
 
   const hasResults = (mejorRutaResult?.length ?? 0) > 0 || nearbyRoutes.length > 0;
 
-  // Get first result for display (mejor_ruta returns multiple results)
-  const firstResult = mejorRutaResult && mejorRutaResult.length > 0 ? mejorRutaResult[0] : null;
-  const mejorRutaRutasCount = firstResult?.rutas?.length ?? 0;
+  // Handle click on a mejor_ruta result (a pair of routes with their cruce)
+  function handleResultClick(result: MejorRutaResponse) {
+    // Decode both routes at once (avoid stale state issues)
+    const decoded0 = result.rutas[0] ? decodePolyline(result.rutas[0].puntos) : [];
+    const decoded1 = result.rutas[1] ? decodePolyline(result.rutas[1].puntos) : [];
 
-  // Handle click on a mejor_ruta result route
-  function handleMejorRutaClick(ruta: { nombre: string; puntos: string }) {
-    // Decode polyline and set as polylines
-    const decoded = decodePolyline(ruta.puntos);
+    // Set both polylines in a single update
     setPolylines({
-      ladoUno: decoded,
-      ladoDos: [], // mejor_ruta only has one direction
+      ladoUno: decoded0,
+      ladoDos: decoded1,
     });
 
-    // Set the cruce point if available (from first result)
-    if (firstResult?.cruce) {
-      setCruce(firstResult.cruce);
+    // Set the specific cruce for this result pair
+    if (result.cruce) {
+      setCruce(result.cruce);
     }
   }
 
@@ -55,7 +55,10 @@ export default function ResultsPanel() {
 
   if (!hasResults) return null;
 
-  const resultCount = mejorRutaRutasCount + nearbyRoutes.length;
+  // Count routes from mejor_ruta (each result has 2 routes: [routeA, routeB])
+  const mejorRutaCount = mejorRutaResult?.length ?? 0;
+  const nearbyCount = nearbyRoutes.length;
+  const resultCount = mejorRutaCount + nearbyCount;
 
   return (
     <div className="absolute top-4 right-4 z-[1000] w-72 bg-white rounded-lg shadow-xl border border-slate-200 overflow-hidden">
@@ -86,37 +89,64 @@ export default function ResultsPanel() {
 
       {/* Collapsible content */}
       {isExpanded && (
-        <div className="max-h-64 overflow-y-auto">
-          {/* Mejor ruta results */}
-          {firstResult && firstResult.rutas && firstResult.rutas.length > 0 && (
+        <div className="max-h-80 overflow-y-auto">
+          {/* Mejor ruta results — show ALL results, each with 2 routes */}
+          {mejorRutaResult && mejorRutaResult.length > 0 && (
             <div className="border-b border-slate-100">
               <div className="px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wide bg-slate-50">
-                Ruta más rápida
+                Rutas con intersección ({mejorRutaResult.length})
               </div>
               <ul className="py-1">
-                {firstResult.rutas.map((ruta, index) => (
-                  <li key={`${ruta.nombre}-${index}`}>
-                    <button
-                      onClick={() => handleMejorRutaClick(ruta)}
-                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-[#0c72b5]/10 hover:text-[#0c72b5] transition-colors flex items-center gap-2"
-                    >
-                      <svg
-                        className="w-4 h-4 text-green-600 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                {mejorRutaResult.map((result, idx) => {
+                  const hasIntersection = result.cruce && result.rutas.length > 1;
+                  const route1Name = result.rutas[0]?.nombre?.replace('RUTA-', 'Ruta ') ?? '';
+                  const route2Name = result.rutas[1]?.nombre?.replace('RUTA-', 'Ruta ') ?? '';
+
+                  return (
+                    <li key={`result-${idx}`}>
+                      <button
+                        onClick={() => handleResultClick(result)}
+                        className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-[#0c72b5]/10 hover:text-[#0c72b5] transition-colors flex items-center gap-2"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-                        />
-                      </svg>
-                      <span>{ruta.nombre.replace('RUTA-', 'Ruta ')}</span>
-                    </button>
-                  </li>
-                ))}
+                        {/* Intersection icon */}
+                        <svg
+                          className={`w-4 h-4 flex-shrink-0 ${hasIntersection ? 'text-blue-600' : 'text-green-600'}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          {hasIntersection ? (
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                            />
+                          ) : (
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                            />
+                          )}
+                        </svg>
+                        <span className="flex flex-wrap gap-1">
+                          {/* Route 1 */}
+                          <span className="font-medium text-slate-800">{route1Name}</span>
+                          {/* Arrow and route 2 if exists */}
+                          {hasIntersection && (
+                            <>
+                              <span className="text-slate-400">↔</span>
+                              <span className="font-medium text-slate-800">{route2Name}</span>
+                              <span className="text-xs text-blue-500 font-medium ml-1">(cruce)</span>
+                            </>
+                          )}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}
@@ -125,11 +155,11 @@ export default function ResultsPanel() {
           {nearbyRoutes.length > 0 && (
             <div>
               <div className="px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wide bg-slate-50">
-                Rutas cercanas
+                Rutas cercanas ({nearbyRoutes.length})
               </div>
               <ul className="py-1">
                 {nearbyRoutes.map((ruta, index) => (
-                  <li key={`${ruta.nombre}-${index}`}>
+                  <li key={`nearby-${ruta.nombre}-${index}`}>
                     <button
                       onClick={() => handleNearbyRouteClick(ruta.nombre)}
                       className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-[#0c72b5]/10 hover:text-[#0c72b5] transition-colors flex items-center gap-2"
