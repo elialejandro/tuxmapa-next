@@ -28,6 +28,7 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       <body className="h-full flex flex-col">
         <MapProvider>{children}</MapProvider>
       </body>
