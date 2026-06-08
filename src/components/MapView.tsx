@@ -32,7 +32,7 @@ const getTileConfig = (): TileConfig => {
 
   if (provider === 'thunderforest' && apikey) {
     return {
-      url: 'https://api.thunderforest.com/atlas/{z}/{x}/{y}{r}.png?apikey=' + apikey,
+      url: 'https://api.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=' + apikey,
       attribution: '&copy; <a href="https://www.thunderforest.com/">Thunderforest</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 22,
     };
@@ -40,7 +40,7 @@ const getTileConfig = (): TileConfig => {
 
   // Default: OpenStreetMap (no API key required)
   return {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}{r}.png',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 19,
   };
